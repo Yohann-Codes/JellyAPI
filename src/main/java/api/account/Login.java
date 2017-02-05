@@ -18,7 +18,11 @@ import transport.Service;
 /**
  * 登录API.
  *
- * Future future = Login.login(username, password);
+ * public class MyReceiver implements Receiver {
+ *     //...
+ * }
+ *
+ * Future future = Login.login(new MyReceiver(), username, password);
  * future.addListener(new LoginFutureListener() {
  *     @Override
  *     public void onSuccess(String username, Long token) {
@@ -41,11 +45,11 @@ public class Login extends Client implements ConnectionListener {
     private static Long token;
 
     /**
-     * 登录
+     * 调用此方法登录账户
      *
-     * @param username
-     * @param password
-     * @return
+     * @param username 用户名
+     * @param password 密码
+     * @return future
      */
     public static Future login(Receiver receiver, String username, String password) {
         Login.username = username;

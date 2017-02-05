@@ -38,6 +38,13 @@ public class Register implements ConnectionListener {
     private static String password;
     private static Channel channel;
 
+    /**
+     * 调用此方法注册账户
+     *
+     * @param username 用户名
+     * @param password 密码
+     * @return future
+     */
     public static Future register(String username, String password) {
         Register.username = username;
         Register.password = password;

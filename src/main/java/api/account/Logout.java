@@ -22,6 +22,9 @@ public class Logout extends Client {
         doLogout();
     }
 
+    /**
+     * 调用此方法登出账户
+     */
     private static void doLogout() {
         Account account = new Account();
         account.setUsername(mUsername);
