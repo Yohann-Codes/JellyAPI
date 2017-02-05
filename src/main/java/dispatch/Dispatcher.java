@@ -6,6 +6,10 @@ import api.friend.AllFriend;
 import api.friend.FriendAdd;
 import api.friend.FriendRemove;
 import api.future.*;
+import api.group.GroupCreate;
+import api.group.GroupDisband;
+import api.group.MemberAdd;
+import api.group.MemberRemove;
 import api.info.FriendInfo;
 import api.info.InfoUpdate;
 import api.info.SelfInfo;
@@ -77,6 +81,22 @@ public class Dispatcher extends Client {
                     case ProtocolHeader.LOOK_FRIEND_INFO:
                         Info fInfo = Serializer.deserialize(messageHolder.getBody(), Info.class);
                         lookFriendInfo(messageHolder, fInfo);
+                        break;
+
+                    case ProtocolHeader.CREATE_GROUP:
+                        createGroup(messageHolder);
+                        break;
+
+                    case ProtocolHeader.DISBAND_GROUP:
+                        disbandGroup(messageHolder);
+                        break;
+
+                    case ProtocolHeader.ADD_MEMBER:
+                        addMember(messageHolder);
+                        break;
+
+                    case ProtocolHeader.REMOVE_MEMBER:
+                        removeMember(messageHolder);
                         break;
 
                     default:
@@ -256,6 +276,66 @@ public class Dispatcher extends Client {
         if (status == ProtocolHeader.SUCCESS) {
             listener.onSuccess(info.getUsername(), info.getName(), info.getSex(),
                     info.getAge(), info.getPhone(), info.getAddress(), info.getIntroduction());
+        } else {
+            listener.onFailure(Byte.toUnsignedInt(status));
+        }
+    }
+
+    /**
+     * 创建讨论组响应
+     *
+     * @param messageHolder
+     */
+    private static void createGroup(MessageHolder messageHolder) {
+        GroupCreateFutureListener listener = GroupCreate.future.getListener();
+        byte status = messageHolder.getStatus();
+        if (status == ProtocolHeader.SUCCESS) {
+            listener.onSuccess();
+        } else {
+            listener.onFailure(Byte.toUnsignedInt(status));
+        }
+    }
+
+    /**
+     * 解散讨论组响应
+     *
+     * @param messageHolder
+     */
+    private static void disbandGroup(MessageHolder messageHolder) {
+        GroupDisbandFutureListener listener = GroupDisband.future.getListener();
+        byte status = messageHolder.getStatus();
+        if (status == ProtocolHeader.SUCCESS) {
+            listener.onSuccess();
+        } else {
+            listener.onFailure(Byte.toUnsignedInt(status));
+        }
+    }
+
+    /**
+     * 添加讨论组成员响应
+     *
+     * @param messageHolder
+     */
+    private static void addMember(MessageHolder messageHolder) {
+        MemberAddFutureListener listener = MemberAdd.future.getListener();
+        byte status = messageHolder.getStatus();
+        if (status == ProtocolHeader.SUCCESS) {
+            listener.onSuccess();
+        } else {
+            listener.onFailure(Byte.toUnsignedInt(status));
+        }
+    }
+
+    /**
+     * 删除讨论组成员响应
+     *
+     * @param messageHolder
+     */
+    private static void removeMember(MessageHolder messageHolder) {
+        MemberRemoveFutureListener listener = MemberRemove.future.getListener();
+        byte status = messageHolder.getStatus();
+        if (status == ProtocolHeader.SUCCESS) {
+            listener.onSuccess();
         } else {
             listener.onFailure(Byte.toUnsignedInt(status));
         }

@@ -36,6 +36,9 @@ public class Checker {
                 }
                 break;
             case 5:
+                if (length == 3) {
+                    return true;
+                }
                 break;
             case 6:
                 if (length == 3 || length == 4) {

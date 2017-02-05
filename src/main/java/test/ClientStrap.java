@@ -7,6 +7,10 @@ import api.friend.AllFriend;
 import api.friend.FriendAdd;
 import api.friend.FriendRemove;
 import api.future.*;
+import api.group.GroupCreate;
+import api.group.GroupDisband;
+import api.group.MemberAdd;
+import api.group.MemberRemove;
 import api.info.FriendInfo;
 import api.info.InfoUpdate;
 import api.info.SelfInfo;
@@ -99,6 +103,23 @@ public class ClientStrap {
                         break;
 
                     case 5:
+                        if (Checker.check(5, keywords.length)) {
+                            try {
+                                optionId = commandLine.getGroupOptions().get(keywords[1]);
+                            } catch (Exception e) {
+                                System.out.println("不支持此选项");
+                                System.out.print(ClientInfo.username + " > ");
+                                continue;
+                            }
+                            switch (optionId) {
+                                case 1:
+                                    createGroup(keywords[2]);
+                                    break;
+                                case 2:
+                                    disbandGroup(keywords[2]);
+                                    break;
+                            }
+                        }
                         break;
 
                     case 6:
@@ -115,6 +136,7 @@ public class ClientStrap {
                                     addFriend(keywords[2]);
                                     break;
                                 case 2:
+                                    addMember(keywords[2], keywords[3]);
                                     break;
                             }
                         }
@@ -134,6 +156,7 @@ public class ClientStrap {
                                     removeFriend(keywords[2]);
                                     break;
                                 case 2:
+                                    removeMember(keywords[2], keywords[3]);
                                     break;
                             }
                         }
@@ -497,6 +520,70 @@ public class ClientStrap {
             @Override
             public void onFailure(int errorCode) {
                 System.out.println("信息查询失败 errorCode: " + errorCode);
+                System.out.print(ClientInfo.username + " > ");
+            }
+        });
+    }
+
+    private void createGroup(String groupName) {
+        Future future = GroupCreate.create(groupName);
+        future.addListener(new GroupCreateFutureListener() {
+            @Override
+            public void onSuccess() {
+                System.out.print(ClientInfo.username + " > ");
+            }
+
+            @Override
+            public void onFailure(int errorCode) {
+                System.out.println("讨论组创建失败 errorCode: " + errorCode);
+                System.out.print(ClientInfo.username + " > ");
+            }
+        });
+    }
+
+    private void disbandGroup(String groupName) {
+        Future future = GroupDisband.disband(groupName);
+        future.addListener(new GroupDisbandFutureListener() {
+            @Override
+            public void onSuccess() {
+                System.out.print(ClientInfo.username + " > ");
+            }
+
+            @Override
+            public void onFailure(int errorCode) {
+                System.out.println("讨论组解散失败 errorCode: " + errorCode);
+                System.out.print(ClientInfo.username + " > ");
+            }
+        });
+    }
+
+    private void addMember(String groupName, String username) {
+        Future future = MemberAdd.add(groupName, username);
+        future.addListener(new MemberAddFutureListener() {
+            @Override
+            public void onSuccess() {
+                System.out.print(ClientInfo.username + " > ");
+            }
+
+            @Override
+            public void onFailure(int errorCode) {
+                System.out.println("讨论组添加成员失败 errorCode: " + errorCode);
+                System.out.print(ClientInfo.username + " > ");
+            }
+        });
+    }
+
+    private void removeMember(String groupName, String username) {
+        Future future = MemberRemove.remove(groupName, username);
+        future.addListener(new MemberRemoveFutureListener() {
+            @Override
+            public void onSuccess() {
+                System.out.print(ClientInfo.username + " > ");
+            }
+
+            @Override
+            public void onFailure(int errorCode) {
+                System.out.println("讨论组删除成员失败 errorCode: " + errorCode);
                 System.out.print(ClientInfo.username + " > ");
             }
         });
