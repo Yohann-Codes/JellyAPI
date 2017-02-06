@@ -11,8 +11,10 @@ import api.group.GroupDisband;
 import api.group.MemberAdd;
 import api.group.MemberRemove;
 import api.info.FriendInfo;
+import api.info.InfoGroup;
 import api.info.InfoUpdate;
 import api.info.SelfInfo;
+import api.message.GroupMessage;
 import api.message.PersonMessage;
 import com.oracle.deploy.update.UpdateInfo;
 import common.Client;
@@ -54,6 +56,10 @@ public class Dispatcher extends Client {
 
                     case ProtocolHeader.PERSON_MESSAGE:
                         personMessage(messageHolder);
+                        break;
+
+                    case ProtocolHeader.GROUP_MESSAGE:
+                        groupMessage(messageHolder);
                         break;
 
                     case ProtocolHeader.ADD_FRIEND:
@@ -99,6 +105,15 @@ public class Dispatcher extends Client {
                         removeMember(messageHolder);
                         break;
 
+                    case ProtocolHeader.LOOK_GROUP_INFO:
+                        MyGroup myGroup = Serializer.deserialize(messageHolder.getBody(), MyGroup.class);
+                        groupInfo(messageHolder, myGroup);
+                        break;
+
+                    case ProtocolHeader.RECONN:
+                        reconn(messageHolder);
+                        break;
+
                     default:
                         break;
                 }
@@ -109,6 +124,11 @@ public class Dispatcher extends Client {
                     case ProtocolHeader.PERSON_MESSAGE:
                         Message pMessage = Serializer.deserialize(messageHolder.getBody(), Message.class);
                         personMessageNotice(pMessage);
+                        break;
+
+                    case ProtocolHeader.GROUP_MESSAGE:
+                        Message gMessage = Serializer.deserialize(messageHolder.getBody(), Message.class);
+                        groupMessageNotice(gMessage);
                         break;
 
                     default:
@@ -178,12 +198,36 @@ public class Dispatcher extends Client {
     }
 
     /**
+     * 讨论组消息响应
+     *
+     * @param messageHolder
+     */
+    private static void groupMessage(MessageHolder messageHolder) {
+        GroupMessageFutureListener listener = GroupMessage.future.getListener();
+        byte status = messageHolder.getStatus();
+        if (status == ProtocolHeader.SUCCESS) {
+            listener.onSuccess();
+        } else {
+            listener.onFailure(Byte.toUnsignedInt(status));
+        }
+    }
+
+    /**
      * 个人消息通知
      *
      * @param message
      */
     private static void personMessageNotice(Message message) {
         mReceiver.personMessage(message.getSender(), message.getContent(), message.getTime());
+    }
+
+    /**
+     * 讨论组消息通知
+     *
+     * @param message
+     */
+    private static void groupMessageNotice(Message message) {
+        mReceiver.groupMessage(message.getReceiver(), message.getSender(), message.getContent(), message.getTime());
     }
 
     /**
@@ -338,6 +382,35 @@ public class Dispatcher extends Client {
             listener.onSuccess();
         } else {
             listener.onFailure(Byte.toUnsignedInt(status));
+        }
+    }
+
+    /**
+     * 查看讨论组信息响应
+     *
+     * @param messageHolder
+     * @param myGroup
+     */
+    private static void groupInfo(MessageHolder messageHolder, MyGroup myGroup) {
+        InfoGroupFutureListener listener = InfoGroup.future.getListener();
+        byte status = messageHolder.getStatus();
+        if (status == ProtocolHeader.SUCCESS) {
+            listener.onSuccess(myGroup.getGroups());
+        } else {
+            listener.onFailure(Byte.toUnsignedInt(status));
+        }
+    }
+
+    /**
+     * 断线重连响应
+     *
+     * @param messageHolder
+     */
+    private static void reconn(MessageHolder messageHolder) {
+        if (messageHolder.getStatus() == ProtocolHeader.SUCCESS) {
+            mReceiver.reconnection(true);
+        } else {
+            mReceiver.reconnection(false);
         }
     }
 }

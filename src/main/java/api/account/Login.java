@@ -52,6 +52,7 @@ public class Login extends Client implements ConnectionListener {
      * @return future
      */
     public static Future login(Receiver receiver, String username, String password) {
+        isLogout = false;
         Login.username = username;
         Login.password = password;
         mReceiver = receiver;
@@ -73,6 +74,7 @@ public class Login extends Client implements ConnectionListener {
      * @return
      */
     public static Future login(Long token) {
+        isLogout = false;
         Login.token = token;
         // 异步连接
         new Thread() {

@@ -27,7 +27,7 @@ public class Client {
     /**
      * 登出标志
      */
-    protected static boolean isLogout = false;
+    protected static boolean isLogout;
 
     /**
      * 回调MessageReceiver中的方法

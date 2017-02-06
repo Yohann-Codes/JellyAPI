@@ -48,8 +48,8 @@ public class CommandLine {
         commands.put("register", 3);       // 注册        register <username> <password>
         commands.put("message", 4);        // 发送消息     message [-p/-g] <receiver> <content>
         commands.put("group", 5);          // 讨论组       group [-c/-d] <groupName>
-        commands.put("add", 6);            // 添加        add [-f/-m] <username> <groupName>
-        commands.put("remove", 7);         // 删除        remove [-f/-m] <username> <groupName>
+        commands.put("add", 6);            // 添加        add [-f/-m] <groupName> <username>
+        commands.put("remove", 7);         // 删除        remove [-f/-m] <groupName> <username>
         commands.put("update", 8);         // 修改信息     update [-p/-n/-s/-a/-P/-A/-i] <content>
         commands.put("show", 9);           // 查看信息     show [-m/-f] <friend>
         commands.put("display", 10);       // 列出        display [-f/-g]

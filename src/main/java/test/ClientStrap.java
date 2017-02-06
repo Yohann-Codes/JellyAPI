@@ -12,16 +12,15 @@ import api.group.GroupDisband;
 import api.group.MemberAdd;
 import api.group.MemberRemove;
 import api.info.FriendInfo;
+import api.info.InfoGroup;
 import api.info.InfoUpdate;
 import api.info.SelfInfo;
+import api.message.GroupMessage;
 import api.message.PersonMessage;
 import com.sun.deploy.util.StringUtils;
 import pojo.Friend;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 启动命令行.
@@ -97,6 +96,7 @@ public class ClientStrap {
                                     personMessage(keywords[2], keywords[3]);
                                     break;
                                 case 2:
+                                    groupMessage(keywords[2], keywords[3]);
                                     break;
                             }
                         }
@@ -231,6 +231,7 @@ public class ClientStrap {
                                     displayFriend();
                                     break;
                                 case 2:
+                                    displayGroup();
                                     break;
                             }
                         }
@@ -240,13 +241,39 @@ public class ClientStrap {
         }
     }
 
+    /**
+     * command help
+     */
     private static void help() {
-        System.out.println("1. help  命令帮助");
-        System.out.println("2. login <username> <password>  登录");
-        System.out.println("3. register <username> <password>  注册");
-        System.out.println("4. message");
-        System.out.println("   message [-p] <receiver> <content>  发送个人消息");
-        System.out.println("   message [-g] <receiver> <content>  发送个人消息");
+        System.out.println(" 1. help  命令帮助");
+        System.out.println(" 2. login <username> <password>  登录");
+        System.out.println(" 3. register <username> <password>  注册");
+        System.out.println(" 4. message");
+        System.out.println("    message [-p] <receiver> <content>  发送个人消息");
+        System.out.println("    message [-g] <receiver> <content>  发送个人消息");
+        System.out.println(" 5. group");
+        System.out.println("    group [-c] <groupName>  创建讨论组");
+        System.out.println("    group [-d] <groupName>  解散讨论组");
+        System.out.println(" 6. add");
+        System.out.println("    add [-f] <username>  添加好友");
+        System.out.println("    add [-m] <groupName> <username>  讨论组添加成员");
+        System.out.println(" 7. remove");
+        System.out.println("    remove [-f] <username>  删除好友");
+        System.out.println("    remove [-m] <groupName> <username>  讨论组删除成员");
+        System.out.println(" 8. update");
+        System.out.println("    update [-p] <content> 修改密码");
+        System.out.println("    update [-n] <content> 修改姓名");
+        System.out.println("    update [-s] <content> 修改性别");
+        System.out.println("    update [-a] <content> 修改年龄");
+        System.out.println("    update [-P] <content> 修改联系电话");
+        System.out.println("    update [-A] <content> 修改家庭住址");
+        System.out.println("    update [-i] <content> 修改自我介绍");
+        System.out.println(" 9. show");
+        System.out.println("    show [-m]  查看自己的个人信息");
+        System.out.println("    show [-f]  查看好友的个人信息");
+        System.out.println("10. display");
+        System.out.println("    display [-f]  列出已添加的好友");
+        System.out.println("    display [-g]  列出已加入的讨论组");
         System.out.print(ClientInfo.username + " > ");
     }
 
@@ -584,6 +611,50 @@ public class ClientStrap {
             @Override
             public void onFailure(int errorCode) {
                 System.out.println("讨论组删除成员失败 errorCode: " + errorCode);
+                System.out.print(ClientInfo.username + " > ");
+            }
+        });
+    }
+
+    private void groupMessage(String groupName, String content) {
+        Future future = GroupMessage.send(groupName, content);
+        future.addListener(new GroupMessageFutureListener() {
+            @Override
+            public void onSuccess() {
+                System.out.print(ClientInfo.username + " > ");
+            }
+
+            @Override
+            public void onFailure(int errorCode) {
+                System.out.println("消息发送失败 errorCode: " + errorCode);
+                System.out.print(ClientInfo.username + " > ");
+            }
+        });
+    }
+
+    private void displayGroup() {
+        Future future = InfoGroup.query();
+        future.addListener(new InfoGroupFutureListener() {
+            @Override
+            public void onSuccess(Map<String, List<String>> groups) {
+                if (groups.size() != 0) {
+                    Set<Map.Entry<String, List<String>>> entries = groups.entrySet();
+                    Iterator<Map.Entry<String, List<String>>> ite = entries.iterator();
+                    while (ite.hasNext()) {
+                        Map.Entry<String, List<String>> group = ite.next();
+                        String groupName = group.getKey();
+                        List<String> members = group.getValue();
+                        System.out.println(groupName + " " + members);
+                    }
+                } else {
+                    System.out.println("没有加入任何讨论组");
+                }
+                System.out.print(ClientInfo.username + " > ");
+            }
+
+            @Override
+            public void onFailure(int errorCode) {
+                System.out.println("查询失败 errorCode: " + errorCode);
                 System.out.print(ClientInfo.username + " > ");
             }
         });
