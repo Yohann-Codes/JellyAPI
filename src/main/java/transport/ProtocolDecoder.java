@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.util.ReferenceCountUtil;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 
@@ -30,16 +31,18 @@ import java.util.List;
  * @author Yohann.
  */
 public class ProtocolDecoder extends ByteToMessageDecoder {
+
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         if (in.readableBytes() < ProtocolHeader.HEADER_LENGTH) {
             // 数据包长度小于协议头长度
-            ReferenceCountUtil.release(in);
             return;
         }
+        in.markReaderIndex();
+
         if (in.readShort() != ProtocolHeader.MAGIC) {
             // Magic不一致，表明不是自己的数据
-            ReferenceCountUtil.release(in);
+            in.resetReaderIndex();
             return;
         }
 
@@ -52,7 +55,7 @@ public class ProtocolDecoder extends ByteToMessageDecoder {
         int bodyLength = in.readInt();
         if (in.readableBytes() != bodyLength) {
             // 消息体不一致
-            ReferenceCountUtil.release(in);
+            in.resetReaderIndex();
             return;
         }
 
